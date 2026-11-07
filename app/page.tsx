@@ -16,6 +16,7 @@ import {
 import { useAppStore } from '@/lib/store';
 import { DAYS_NAMES } from '@/lib/initialData';
 import AddEventModal from '@/components/AddEventModal';
+import PostulationModal from '@/components/PostulationModal';
 
 export default function HomePage() {
   const { 
@@ -27,6 +28,7 @@ export default function HomePage() {
   } = useAppStore();
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isPostulationModalOpen, setIsPostulationModalOpen] = useState(false);
 
   const isTeacher = currentUser?.role === 'teacher';
 
@@ -43,6 +45,21 @@ export default function HomePage() {
   const ordMins = ordonezMinutes % 60;
 
   const todayIndex = new Date().getDay(); // 1=Lun, 2=Mar, etc.
+
+  // Estadísticas dinámicas de clases
+  const totalCatedraHours = classes.reduce((acc, c) => {
+    if (c.school === 'Timbó Nuevo') return acc + 3;
+    if (c.school === 'Mancopa' && c.day === 4) return acc + 2;
+    if (c.school === 'Mancopa' && c.day === 3) return acc + 1;
+    const [sh, sm] = c.start_time.split(':').map(Number);
+    const [eh, em] = c.end_time.split(':').map(Number);
+    const durationMin = (eh * 60 + em) - (sh * 60 + sm);
+    return acc + Math.round(durationMin / 40);
+  }, 0);
+
+  const distinctSchoolsCount = new Set(classes.map(c => c.school)).size;
+  const takenClassesCount = classes.filter(c => c.status === 'firm').length;
+  const planClassesCount = classes.filter(c => c.status === 'plan').length;
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -79,18 +96,26 @@ export default function HomePage() {
             🗓️ Mi Semana y Horarios
           </h1>
           <p className="text-sm text-[#9aa4d6] [data-tema=dia]_&:text-[#5a638f] mt-1">
-            Cronograma semanal actualizado · Alderetes & Escuelas de Tucumán
+            Cronograma semanal actualizado · Alderetes & Escuelas de Tucumán · 18 hs cátedra tomadas
           </p>
         </div>
 
         {isTeacher && (
-          <button
-            onClick={() => setIsAddModalOpen(true)}
-            className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#ffd166] text-[#241a00] font-bold text-sm hover:bg-[#ffc83d] transition shadow-md"
-          >
-            <Plus className="w-4 h-4" />
-            <span>Agregar Cita / Evento (Dentista, etc.)</span>
-          </button>
+          <div className="flex flex-wrap items-center gap-2.5">
+            <button
+              onClick={() => setIsPostulationModalOpen(true)}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#06d6a0] hover:bg-[#05b386] text-[#0d122b] font-bold text-xs sm:text-sm transition shadow-lg shadow-[#06d6a0]/20"
+            >
+              <span>🎯 Postularme a Horas / Verificar Choque</span>
+            </button>
+            <button
+              onClick={() => setIsAddModalOpen(true)}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-full bg-[#ffd166] text-[#241a00] font-bold text-xs sm:text-sm hover:bg-[#ffc83d] transition shadow-md"
+            >
+              <Plus className="w-4 h-4" />
+              <span>Cita / Dentista</span>
+            </button>
+          </div>
         )}
       </div>
 
@@ -98,7 +123,7 @@ export default function HomePage() {
       <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
         <div className="p-3 sm:p-4 rounded-2xl bg-[#151c3d] [data-tema=dia]_&:bg-white border border-[#2a3568] [data-tema=dia]_&:border-[#d3d9ef]">
           <span className="font-fredoka font-bold text-xl sm:text-2xl text-[#ffd166] [data-tema=dia]_&:text-[#9a6400] block">
-            19
+            {totalCatedraHours}
           </span>
           <span className="text-xs text-[#9aa4d6] [data-tema=dia]_&:text-[#5a638f] font-semibold">
             hs cátedra totales
@@ -107,25 +132,25 @@ export default function HomePage() {
 
         <div className="p-3 sm:p-4 rounded-2xl bg-[#151c3d] [data-tema=dia]_&:bg-white border border-[#2a3568] [data-tema=dia]_&:border-[#d3d9ef]">
           <span className="font-fredoka font-bold text-xl sm:text-2xl text-[#ffd166] [data-tema=dia]_&:text-[#9a6400] block">
-            6
+            {distinctSchoolsCount}
           </span>
           <span className="text-xs text-[#9aa4d6] [data-tema=dia]_&:text-[#5a638f] font-semibold">
-            escuelas
+            escuelas asignadas
           </span>
         </div>
 
         <div className="p-3 sm:p-4 rounded-2xl bg-[#151c3d] [data-tema=dia]_&:bg-white border border-[#2a3568] [data-tema=dia]_&:border-[#d3d9ef]">
           <span className="font-fredoka font-bold text-xl sm:text-2xl text-[#5eead4] [data-tema=dia]_&:text-[#0f3a35] block">
-            2 ✅
+            {takenClassesCount} ✅
           </span>
           <span className="text-xs text-[#9aa4d6] [data-tema=dia]_&:text-[#5a638f] font-semibold">
-            ya tomadas (acta)
+            ya tomadas (acta firmada)
           </span>
         </div>
 
         <div className="p-3 sm:p-4 rounded-2xl bg-[#151c3d] [data-tema=dia]_&:bg-white border border-[#2a3568] [data-tema=dia]_&:border-[#d3d9ef]">
           <span className="font-fredoka font-bold text-xl sm:text-2xl text-[#ffd166] [data-tema=dia]_&:text-[#9a6400] block">
-            4 🎯
+            {planClassesCount} 🎯
           </span>
           <span className="text-xs text-[#9aa4d6] [data-tema=dia]_&:text-[#5a638f] font-semibold">
             a buscar en Junta
@@ -344,6 +369,12 @@ export default function HomePage() {
         isOpen={isAddModalOpen}
         onClose={() => setIsAddModalOpen(false)}
         onSave={addCalendarEvent}
+      />
+
+      {/* Modal de simulación y verificación de postulación a horas */}
+      <PostulationModal
+        isOpen={isPostulationModalOpen}
+        onClose={() => setIsPostulationModalOpen(false)}
       />
     </div>
   );

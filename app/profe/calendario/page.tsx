@@ -17,10 +17,12 @@ import {
 import { useAppStore } from '@/lib/store';
 import { DAYS_NAMES } from '@/lib/initialData';
 import AddEventModal from '@/components/AddEventModal';
+import PostulationModal from '@/components/PostulationModal';
 
 export default function CalendarPage() {
   const { calendarEvents, addCalendarEvent, removeCalendarEvent } = useAppStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isPostulationModalOpen, setIsPostulationModalOpen] = useState(false);
   const [filterType, setFilterType] = useState<string>('todos');
   const [filterDay, setFilterDay] = useState<string>('todos');
   const [searchTerm, setSearchTerm] = useState('');
@@ -104,6 +106,13 @@ export default function CalendarPage() {
               <span>Tarjetas</span>
             </button>
           </div>
+
+          <button
+            onClick={() => setIsPostulationModalOpen(true)}
+            className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-[#06d6a0] hover:bg-[#05b386] text-[#0d122b] font-bold text-xs sm:text-sm transition shadow-md shadow-[#06d6a0]/20"
+          >
+            <span>🎯 Verificar Postulación</span>
+          </button>
 
           <button
             onClick={() => setIsModalOpen(true)}
@@ -352,6 +361,12 @@ export default function CalendarPage() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         onSave={addCalendarEvent}
+      />
+
+      {/* Modal de simulación y verificación de postulación a horas */}
+      <PostulationModal
+        isOpen={isPostulationModalOpen}
+        onClose={() => setIsPostulationModalOpen(false)}
       />
     </div>
   );

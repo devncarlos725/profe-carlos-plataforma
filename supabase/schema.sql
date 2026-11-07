@@ -55,12 +55,12 @@ CREATE POLICY "Lectura pública de escuelas y cursos" ON public.schools_courses 
 
 -- Insertar escuelas oficiales del Profe Núñez
 INSERT INTO public.schools_courses (school_name, course_name, subject_name, days_schedule) VALUES
-  ('Mons. Conrero', '2° Año', 'Educación Tecnológica I', 'Jueves y Viernes'),
-  ('Reconquista', '3° Año', 'Educación Tecnológica II', 'Martes'),
-  ('Mancopa', '2° y 3° Año', 'Educación Tecnológica', 'Miércoles'),
-  ('El Naranjo', '2° Año', 'Educación Tecnológica I', 'Lunes'),
-  ('Tafí Viejo', '2° Año', 'Educación Tecnológica I', 'Lunes y Martes'),
-  ('Timbó Nuevo', '3° Año', 'Educación Tecnológica II', 'Viernes')
+  ('Mons. Conrero', '2° Año', 'Educación Tecnológica I', 'Jueves y Viernes · 3 hs cátedra'),
+  ('Reconquista', '3° Año', 'Educación Tecnológica II', 'Martes · 3 hs cátedra'),
+  ('Mancopa', '2° y 3° Año', 'Educación Tecnológica', 'Miércoles (16:40-17:20) y Jueves (13:00-14:20) · 3 hs cátedra'),
+  ('El Naranjo', '2° Año', 'Educación Tecnológica I', 'Lunes · 3 hs cátedra'),
+  ('Tafí Viejo', '2° Año', 'Educación Tecnológica I', 'Lunes y Martes · 3 hs cátedra'),
+  ('Timbó Nuevo', '3° Año', 'Educación Tecnológica II', 'Viernes · 3 hs cátedra')
 ON CONFLICT DO NOTHING;
 
 -- 4. TABLA DE EVENTOS DE CALENDARIO DEL PROFE (Horarios, Citas, Dentista, Trámites)

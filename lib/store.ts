@@ -9,7 +9,10 @@ import {
   StudentProgress, 
   TaskSubmission,
   CurriculumTopic,
-  StudentRecord
+  StudentRecord,
+  PostulationItem,
+  ScheduleConflictResult,
+  ConflictDetail
 } from './types';
 import { 
   INITIAL_CLASSES, 
@@ -23,12 +26,14 @@ import { savePdfToIndexedDB, getPdfFromIndexedDB, deletePdfFromIndexedDB } from 
 
 const STORAGE_KEYS = {
   USER: 'profe_active_user',
-  CALENDAR: 'profe_calendar_events',
+  CALENDAR: 'profe_calendar_events_v2',
   MATERIALS: 'profe_materials',
   PROGRESS: 'profe_student_progress',
   SUBMISSIONS: 'profe_submissions',
   CURRICULUM: 'profe_curriculum_topics',
   STUDENTS: 'profe_students_list',
+  CLASSES: 'profe_classes_list_v2',
+  POSTULATIONS: 'profe_postulations_list',
   THEME: 'profe_theme',
 };
 
@@ -68,6 +73,8 @@ export const DEFAULT_STUDENT: UserProfile = {
 export function useAppStore() {
   const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
   const [calendarEvents, setCalendarEvents] = useState<CalendarEventItem[]>(INITIAL_CALENDAR_EVENTS);
+  const [classes, setClasses] = useState<ClassScheduleItem[]>(INITIAL_CLASSES);
+  const [postulations, setPostulations] = useState<PostulationItem[]>([]);
   const [materials, setMaterials] = useState<LearningMaterial[]>(INITIAL_MATERIALS);
   const [curriculumTopics, setCurriculumTopics] = useState<CurriculumTopic[]>(INITIAL_CURRICULUM_TOPICS);
   const [students, setStudents] = useState<StudentRecord[]>(INITIAL_STUDENTS);
@@ -93,6 +100,19 @@ export function useAppStore() {
       } else {
         setCurrentUser(DEFAULT_TEACHER);
         safeSetItem(STORAGE_KEYS.USER, JSON.stringify(DEFAULT_TEACHER));
+      }
+
+      const savedClasses = localStorage.getItem(STORAGE_KEYS.CLASSES);
+      if (savedClasses) {
+        setClasses(JSON.parse(savedClasses));
+      } else {
+        setClasses(INITIAL_CLASSES);
+        safeSetItem(STORAGE_KEYS.CLASSES, JSON.stringify(INITIAL_CLASSES));
+      }
+
+      const savedPostulations = localStorage.getItem(STORAGE_KEYS.POSTULATIONS);
+      if (savedPostulations) {
+        setPostulations(JSON.parse(savedPostulations));
       }
 
       const savedEvents = localStorage.getItem(STORAGE_KEYS.CALENDAR);
@@ -563,6 +583,177 @@ export function useAppStore() {
     safeSetItem(STORAGE_KEYS.STUDENTS, JSON.stringify(updated));
   };
 
+  // Conversión HH:MM a minutos para cálculo de choques
+  const toMinutes = (timeStr: string): number => {
+    if (!timeStr) return 0;
+    const [h, m] = timeStr.split(':').map(Number);
+    return (h || 0) * 60 + (m || 0);
+  };
+
+  // Verificador en tiempo real de choques de horario
+  const checkScheduleConflict = (
+    day: number,
+    startTime: string,
+    endTime: string,
+    excludeId?: string
+  ): ScheduleConflictResult => {
+    const newStart = toMinutes(startTime);
+    const newEnd = toMinutes(endTime);
+    const conflicts: ConflictDetail[] = [];
+    const warnings: string[] = [];
+
+    if (newEnd <= newStart) {
+      return {
+        hasConflict: true,
+        conflicts: [
+          {
+            title: 'Horario no válido',
+            day,
+            start_time: startTime,
+            end_time: endTime,
+            type: 'personal',
+            reason: 'La hora de finalización debe ser posterior a la hora de inicio.',
+          },
+        ],
+        warnings: [],
+      };
+    }
+
+    // 1. Verificar contra Clases tomadas en ese día
+    classes.forEach(c => {
+      if (c.day === day && c.id !== excludeId) {
+        const cStart = toMinutes(c.start_time);
+        const cEnd = toMinutes(c.end_time);
+        if (Math.max(newStart, cStart) < Math.min(newEnd, cEnd)) {
+          conflicts.push({
+            title: `Clase en ${c.school} (${c.course} · ${c.subject})`,
+            day,
+            start_time: c.start_time,
+            end_time: c.end_time,
+            type: 'clase',
+            reason: `Choque directo con tu clase tomada de ${c.school} (${c.start_time} a ${c.end_time}).`,
+          });
+        } else {
+          const gap = Math.min(Math.abs(newStart - cEnd), Math.abs(cStart - newEnd));
+          if (gap < 20) {
+            warnings.push(
+              `Margen muy ajustado de ${gap} min con tu clase en ${c.school} (${c.start_time} - ${c.end_time}). Verificá el tiempo de viaje.`
+            );
+          }
+        }
+      }
+    });
+
+    // 2. Verificar contra Eventos de Calendario (Ordoñez Vidrios, Viajes, Turnos médicos, etc.)
+    calendarEvents.forEach(ev => {
+      if (ev.day_of_week === day && ev.id !== excludeId) {
+        const evStart = toMinutes(ev.start_time);
+        const evEnd = toMinutes(ev.end_time);
+
+        if (Math.max(newStart, evStart) < Math.min(newEnd, evEnd)) {
+          if (ev.event_type !== 'libre') {
+            conflicts.push({
+              title: ev.title,
+              day,
+              start_time: ev.start_time,
+              end_time: ev.end_time,
+              type: ev.event_type,
+              reason: `Choque con: ${ev.title} programado de ${ev.start_time} a ${ev.end_time}.`,
+            });
+          }
+        }
+      }
+    });
+
+    return {
+      hasConflict: conflicts.length > 0,
+      conflicts,
+      warnings,
+    };
+  };
+
+  const addPostulation = (postulation: Omit<PostulationItem, 'id' | 'created_at'>) => {
+    const newItem: PostulationItem = {
+      ...postulation,
+      id: `post-${Date.now()}`,
+      created_at: new Date().toISOString(),
+    };
+    const updated = [newItem, ...postulations];
+    setPostulations(updated);
+    safeSetItem(STORAGE_KEYS.POSTULATIONS, JSON.stringify(updated));
+    return newItem;
+  };
+
+  const deletePostulation = (id: string) => {
+    const updated = postulations.filter(p => p.id !== id);
+    setPostulations(updated);
+    safeSetItem(STORAGE_KEYS.POSTULATIONS, JSON.stringify(updated));
+  };
+
+  const confirmPostulationAsClass = (postulationId: string) => {
+    const post = postulations.find(p => p.id === postulationId);
+    if (!post) return;
+
+    // Actualizar estado de la postulación
+    const updatedPosts = postulations.map(p =>
+      p.id === postulationId ? { ...p, status: 'tomada' as const } : p
+    );
+    setPostulations(updatedPosts);
+    safeSetItem(STORAGE_KEYS.POSTULATIONS, JSON.stringify(updatedPosts));
+
+    // Agregar a clases oficiales
+    const newClass: ClassScheduleItem = {
+      id: `cl-${Date.now()}`,
+      day: post.day,
+      start_time: post.start_time,
+      end_time: post.end_time,
+      school: post.school,
+      subject: post.subject,
+      course: post.course,
+      status: 'firm',
+      call_number: post.call_number,
+    };
+    const updatedClasses = [...classes, newClass];
+    setClasses(updatedClasses);
+    safeSetItem(STORAGE_KEYS.CLASSES, JSON.stringify(updatedClasses));
+
+    // Agregar al calendario
+    const newEvent: CalendarEventItem = {
+      id: `ev-class-${newClass.id}`,
+      title: `🏫 ${post.school} (${post.course})`,
+      day_of_week: post.day,
+      start_time: post.start_time,
+      end_time: post.end_time,
+      event_type: 'clase',
+      school: post.school,
+    };
+    const updatedEvents = [...calendarEvents, newEvent];
+    setCalendarEvents(updatedEvents);
+    safeSetItem(STORAGE_KEYS.CALENDAR, JSON.stringify(updatedEvents));
+  };
+
+  const addClassItem = (item: Omit<ClassScheduleItem, 'id'>) => {
+    const newClass: ClassScheduleItem = {
+      ...item,
+      id: `cl-${Date.now()}`,
+    };
+    const updated = [...classes, newClass];
+    setClasses(updated);
+    safeSetItem(STORAGE_KEYS.CLASSES, JSON.stringify(updated));
+    return newClass;
+  };
+
+  const removeClassItem = (id: string) => {
+    const updated = classes.filter(c => c.id !== id);
+    setClasses(updated);
+    safeSetItem(STORAGE_KEYS.CLASSES, JSON.stringify(updated));
+  };
+
+  const resetClassesToOfficial = () => {
+    setClasses(INITIAL_CLASSES);
+    safeSetItem(STORAGE_KEYS.CLASSES, JSON.stringify(INITIAL_CLASSES));
+  };
+
   return {
     isReady,
     theme,
@@ -575,7 +766,15 @@ export function useAppStore() {
     calendarEvents,
     addCalendarEvent,
     removeCalendarEvent,
-    classes: INITIAL_CLASSES,
+    classes,
+    addClassItem,
+    removeClassItem,
+    resetClassesToOfficial,
+    postulations,
+    addPostulation,
+    deletePostulation,
+    confirmPostulationAsClass,
+    checkScheduleConflict,
     materials,
     addMaterial,
     deleteMaterial,

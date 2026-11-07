@@ -129,4 +129,35 @@ export interface StudentRecord {
   last_submission_feedback?: string;
 }
 
+export interface PostulationItem {
+  id: string;
+  school: string;
+  subject: string;
+  course: string;
+  day: number; // 1 = Lunes, 2 = Martes, 3 = Miércoles, 4 = Jueves, 5 = Viernes
+  start_time: string; // HH:MM
+  end_time: string; // HH:MM
+  hours_count: number; // hs cátedra (e.g. 2, 3, 4)
+  status: 'postulado' | 'rechazado' | 'tomada';
+  call_number?: number;
+  notes?: string;
+  created_at: string;
+}
+
+export interface ConflictDetail {
+  title: string;
+  day: number;
+  start_time: string;
+  end_time: string;
+  type: 'clase' | 'personal' | 'tramite' | 'ordonez' | 'viaje';
+  reason: string;
+}
+
+export interface ScheduleConflictResult {
+  hasConflict: boolean;
+  conflicts: ConflictDetail[];
+  warnings: string[];
+}
+
+
 

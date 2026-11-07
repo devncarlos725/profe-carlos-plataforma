@@ -23,7 +23,7 @@ export const SCHOOLS_COURSES: SchoolCourse[] = [
     school_name: 'Mancopa',
     course_name: '2° y 3° Año',
     subject_name: 'Educación Tecnológica',
-    days_schedule: 'Miércoles (14:30 - 15:10 y 16:40 - 18:40)',
+    days_schedule: 'Miércoles (16:40 - 17:20) y Jueves (13:00 - 14:20) · 3 hs cátedra',
   },
   {
     id: 'sc-4',
@@ -48,7 +48,7 @@ export const SCHOOLS_COURSES: SchoolCourse[] = [
   },
 ];
 
-// CLASES DEL PROFE (19 hs cátedra, 6 escuelas)
+// CLASES DEL PROFE (18 hs cátedra, 6 escuelas - ¡TODAS TOMADAS CON ACTA FIRMADA! ✅)
 export const INITIAL_CLASSES: ClassScheduleItem[] = [
   // Lunes
   {
@@ -59,7 +59,7 @@ export const INITIAL_CLASSES: ClassScheduleItem[] = [
     school: 'El Naranjo',
     subject: 'Educ. Tecnológica I',
     course: '2° Año',
-    status: 'plan',
+    status: 'firm',
     call_number: 22,
     km: 25.7,
     min: 26,
@@ -74,7 +74,7 @@ export const INITIAL_CLASSES: ClassScheduleItem[] = [
     school: 'Tafí Viejo',
     subject: 'Educ. Tecnológica I',
     course: '2° Año',
-    status: 'plan',
+    status: 'firm',
     call_number: 19,
     km: 20,
     min: 26,
@@ -94,7 +94,7 @@ export const INITIAL_CLASSES: ClassScheduleItem[] = [
     km: 15.8,
     min: 37,
     departure_time: '10:20',
-    departure_from: 'Casa', // Ya no sale de Ordoñez el martes
+    departure_from: 'Casa',
   },
   {
     id: 'cl-4',
@@ -104,44 +104,30 @@ export const INITIAL_CLASSES: ClassScheduleItem[] = [
     school: 'Tafí Viejo',
     subject: 'Educ. Tecnológica I',
     course: '2° Año',
-    status: 'plan',
+    status: 'firm',
     call_number: 19,
     km: 20,
     min: 26,
     departure_time: '17:15',
-    departure_from: 'Casa', // Ya no sale de Ordoñez el martes
+    departure_from: 'Casa',
   },
-  // Miércoles (Mancopa)
+  // Miércoles (Mancopa: 16:40 a 17:20 = 1 h cátedra)
   {
     id: 'cl-5',
     day: 3,
-    start_time: '14:30',
-    end_time: '15:10',
+    start_time: '16:40',
+    end_time: '17:20',
     school: 'Mancopa',
     subject: 'Educ. Tecnológica',
     course: '2° y 3° Año',
-    status: 'plan',
+    status: 'firm',
     call_number: 14,
     km: 25.2,
     min: 31,
-    departure_time: '13:30',
-    departure_from: 'Ordoñez',
+    departure_time: '15:55',
+    departure_from: 'Casa',
   },
-  {
-    id: 'cl-6',
-    day: 3,
-    start_time: '16:40',
-    end_time: '18:40',
-    school: 'Mancopa',
-    subject: 'Educ. Tecnológica',
-    course: '2° y 3° Año',
-    status: 'plan',
-    call_number: 14,
-    km: 26,
-    min: 35,
-    is_stay: true,
-  },
-  // Jueves (Mons. Conrero, SIN Ordoñez mañana)
+  // Jueves (Mons. Conrero: 10:30-11:10 + Mancopa: 13:00-14:20 = 2 hs cátedra)
   {
     id: 'cl-7',
     day: 4,
@@ -154,7 +140,22 @@ export const INITIAL_CLASSES: ClassScheduleItem[] = [
     km: 13.8,
     min: 17,
     departure_time: '10:00',
-    departure_from: 'Casa', // Sale de Casa directo a Mons. Conrero
+    departure_from: 'Casa',
+  },
+  {
+    id: 'cl-6',
+    day: 4,
+    start_time: '13:00',
+    end_time: '14:20',
+    school: 'Mancopa',
+    subject: 'Educ. Tecnológica',
+    course: '2° y 3° Año',
+    status: 'firm',
+    call_number: 14,
+    km: 25.2,
+    min: 31,
+    departure_time: '12:20',
+    departure_from: 'Mons. Conrero',
   },
   // Viernes (Timbó Nuevo + Mons. Conrero)
   {
@@ -165,7 +166,7 @@ export const INITIAL_CLASSES: ClassScheduleItem[] = [
     school: 'Timbó Nuevo',
     subject: 'Educ. Tecnológica II',
     course: '3° Año',
-    status: 'plan',
+    status: 'firm',
     call_number: 21,
     km: 21.5,
     min: 25,
@@ -189,8 +190,7 @@ export const INITIAL_CLASSES: ClassScheduleItem[] = [
 ];
 
 // EVENTOS FIJOS / VIAJES Y ORDOÑEZ ACTUALIZADOS:
-// Martes Ordoñez ELIMINADO por completo (mañana y siesta)
-// Jueves Ordoñez mañana ELIMINADO. Queda la tarde.
+// Mancopa miércoles 16:40-17:20 y jueves 13:00-14:20
 export const INITIAL_CALENDAR_EVENTS: CalendarEventItem[] = [
   // Lunes
   { id: 'ev-1', day_of_week: 1, start_time: '08:30', end_time: '08:56', title: '🚗 Casa → El Naranjo', event_type: 'viaje' },
@@ -209,27 +209,32 @@ export const INITIAL_CALENDAR_EVENTS: CalendarEventItem[] = [
   { id: 'ev-12', day_of_week: 2, start_time: '18:30', end_time: '18:56', title: '🚗 Tafí Viejo → Casa', event_type: 'viaje' },
   { id: 'ev-13', day_of_week: 2, start_time: '19:00', end_time: '23:00', title: '🛋️ Libre', event_type: 'libre' },
 
-  // Miércoles
+  // Miércoles (Mancopa a las 16:40)
   { id: 'ev-14', day_of_week: 3, start_time: '07:20', end_time: '07:24', title: '🚗 Casa → Ordoñez', event_type: 'viaje' },
   { id: 'ev-15', day_of_week: 3, start_time: '07:30', end_time: '13:30', title: '💼 Ordoñez Vidrios', event_type: 'ordonez' },
-  { id: 'ev-16', day_of_week: 3, start_time: '13:30', end_time: '14:01', title: '🚗 Ordoñez → Mancopa', event_type: 'viaje' },
-  { id: 'ev-17', day_of_week: 3, start_time: '15:10', end_time: '16:40', title: '🛋️ Hueco en la escuela', event_type: 'libre' },
-  { id: 'ev-18', day_of_week: 3, start_time: '18:40', end_time: '19:15', title: '🚗 Mancopa → Casa', event_type: 'viaje' },
+  { id: 'ev-16', day_of_week: 3, start_time: '13:30', end_time: '13:34', title: '🚗 Ordoñez → Casa', event_type: 'viaje' },
+  { id: 'ev-17', day_of_week: 3, start_time: '13:35', end_time: '15:55', title: '🛋️ Almuerzo / Descanso en Casa', event_type: 'libre' },
+  { id: 'ev-18', day_of_week: 3, start_time: '15:55', end_time: '16:30', title: '🚗 Casa → Mancopa', event_type: 'viaje' },
+  { id: 'ev-19', day_of_week: 3, start_time: '17:20', end_time: '17:55', title: '🚗 Mancopa → Casa', event_type: 'viaje' },
+  { id: 'ev-20', day_of_week: 3, start_time: '18:00', end_time: '23:00', title: '🛋️ Libre', event_type: 'libre' },
 
-  // Jueves (¡Sin Ordoñez a la mañana! Sólo de tarde: 11:30 a 17:30)
-  { id: 'ev-19', day_of_week: 4, start_time: '08:00', end_time: '10:00', title: '🛋️ Libre / Casa', event_type: 'libre' },
-  { id: 'ev-20', day_of_week: 4, start_time: '10:00', end_time: '10:17', title: '🚗 Casa → Mons. Conrero', event_type: 'viaje' },
-  { id: 'ev-21', day_of_week: 4, start_time: '11:10', end_time: '11:27', title: '🚗 Mons. Conrero → Ordoñez', event_type: 'viaje' },
-  { id: 'ev-22', day_of_week: 4, start_time: '11:30', end_time: '17:30', title: '💼 Ordoñez Vidrios', event_type: 'ordonez' },
-  { id: 'ev-23', day_of_week: 4, start_time: '17:30', end_time: '17:34', title: '🚗 Ordoñez → Casa', event_type: 'viaje' },
+  // Jueves (Conrero 10:30-11:10 → Mancopa 13:00-14:20 → Ordoñez 15:00-18:30)
+  { id: 'ev-21', day_of_week: 4, start_time: '08:00', end_time: '10:00', title: '🛋️ Libre / Casa', event_type: 'libre' },
+  { id: 'ev-22', day_of_week: 4, start_time: '10:00', end_time: '10:17', title: '🚗 Casa → Mons. Conrero', event_type: 'viaje' },
+  { id: 'ev-23', day_of_week: 4, start_time: '11:10', end_time: '12:20', title: '🛋️ Almuerzo / Pausa', event_type: 'libre' },
+  { id: 'ev-24', day_of_week: 4, start_time: '12:20', end_time: '12:51', title: '🚗 Mons. Conrero → Mancopa', event_type: 'viaje' },
+  { id: 'ev-25', day_of_week: 4, start_time: '14:20', end_time: '14:55', title: '🚗 Mancopa → Ordoñez', event_type: 'viaje' },
+  { id: 'ev-26', day_of_week: 4, start_time: '15:00', end_time: '18:30', title: '💼 Ordoñez Vidrios', event_type: 'ordonez' },
+  { id: 'ev-27', day_of_week: 4, start_time: '18:30', end_time: '18:34', title: '🚗 Ordoñez → Casa', event_type: 'viaje' },
+  { id: 'ev-28', day_of_week: 4, start_time: '18:35', end_time: '23:00', title: '🛋️ Libre', event_type: 'libre' },
 
   // Viernes
-  { id: 'ev-24', day_of_week: 5, start_time: '06:30', end_time: '06:55', title: '🚗 Casa → Timbó Nuevo', event_type: 'viaje' },
-  { id: 'ev-25', day_of_week: 5, start_time: '09:30', end_time: '09:57', title: '🚗 Timbó Nuevo → Mons. Conrero', event_type: 'viaje' },
-  { id: 'ev-26', day_of_week: 5, start_time: '12:00', end_time: '12:17', title: '🚗 Mons. Conrero → Ordoñez', event_type: 'viaje' },
-  { id: 'ev-27', day_of_week: 5, start_time: '12:30', end_time: '17:30', title: '💼 Ordoñez Vidrios', event_type: 'ordonez' },
-  { id: 'ev-28', day_of_week: 5, start_time: '17:30', end_time: '17:34', title: '🚗 Ordoñez → Casa', event_type: 'viaje' },
-  { id: 'ev-29', day_of_week: 5, start_time: '17:40', end_time: '23:00', title: '🛋️ Libre', event_type: 'libre' },
+  { id: 'ev-29', day_of_week: 5, start_time: '06:30', end_time: '06:55', title: '🚗 Casa → Timbó Nuevo', event_type: 'viaje' },
+  { id: 'ev-30', day_of_week: 5, start_time: '09:30', end_time: '09:57', title: '🚗 Timbó Nuevo → Mons. Conrero', event_type: 'viaje' },
+  { id: 'ev-31', day_of_week: 5, start_time: '12:00', end_time: '12:17', title: '🚗 Mons. Conrero → Ordoñez', event_type: 'viaje' },
+  { id: 'ev-32', day_of_week: 5, start_time: '12:30', end_time: '17:30', title: '💼 Ordoñez Vidrios', event_type: 'ordonez' },
+  { id: 'ev-33', day_of_week: 5, start_time: '17:30', end_time: '17:34', title: '🚗 Ordoñez → Casa', event_type: 'viaje' },
+  { id: 'ev-34', day_of_week: 5, start_time: '17:40', end_time: '23:00', title: '🛋️ Libre', event_type: 'libre' },
 ];
 
 // MATERIALES EDUCATIVOS INICIALES (PDFs de lectura, guías, videos de YouTube y tareas)
