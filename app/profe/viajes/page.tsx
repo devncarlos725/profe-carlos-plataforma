@@ -13,10 +13,10 @@ interface TripRecord {
 }
 
 const DEFAULT_PLAN = [
-  { day: 1, route: 'Casa → El Naranjo → Ordoñez → Tafí Viejo → Casa', km: 89.1, min: 103 },
-  { day: 2, route: 'Casa → Reconquista → Tafí Viejo → Casa (sin Ordoñez)', km: 62.4, min: 95 },
-  { day: 3, route: 'Casa → Ordoñez → Mancopa → Casa (vuelta estimada)', km: 53.5, min: 70 },
-  { day: 4, route: 'Casa → Mons. Conrero → Ordoñez → Casa (tarde)', km: 32.2, min: 42 },
+  { day: 1, route: 'Casa → El Naranjo → Casa → Tafí Viejo → Casa (sin Ordoñez)', km: 91.4, min: 104 },
+  { day: 2, route: 'Casa → Reconquista → Ordoñez (13:30-17:00) → Tafí Viejo (17:50-18:30) → Casa', km: 68.2, min: 110 },
+  { day: 3, route: 'Casa → Ordoñez (07:30-16:00) → Mancopa (16:40-17:20) → Casa', km: 54.6, min: 74 },
+  { day: 4, route: 'Casa → Mons. Conrero (10:30-11:10) → Mancopa (13:00-14:20) → Ordoñez (15:00-18:30) → Casa', km: 62.8, min: 83 },
   { day: 5, route: 'Casa → Timbó Nuevo → Mons. Conrero → Ordoñez → Casa', km: 57.4, min: 73 },
 ];
 

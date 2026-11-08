@@ -26,13 +26,13 @@ import { savePdfToIndexedDB, getPdfFromIndexedDB, deletePdfFromIndexedDB } from 
 
 const STORAGE_KEYS = {
   USER: 'profe_active_user',
-  CALENDAR: 'profe_calendar_events_v2',
+  CALENDAR: 'profe_calendar_events_v3',
   MATERIALS: 'profe_materials',
   PROGRESS: 'profe_student_progress',
   SUBMISSIONS: 'profe_submissions',
   CURRICULUM: 'profe_curriculum_topics',
   STUDENTS: 'profe_students_list',
-  CLASSES: 'profe_classes_list_v2',
+  CLASSES: 'profe_classes_list_v3',
   POSTULATIONS: 'profe_postulations_list',
   THEME: 'profe_theme',
 };
