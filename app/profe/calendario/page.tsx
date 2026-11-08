@@ -11,18 +11,27 @@ import {
   Table as TableIcon, 
   LayoutGrid, 
   Tag, 
-  FileText,
-  Filter
+  FileText, 
+  Filter,
+  Pencil
 } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
 import { DAYS_NAMES } from '@/lib/initialData';
 import AddEventModal from '@/components/AddEventModal';
 import PostulationModal from '@/components/PostulationModal';
+import EditBlockModal, { EditableBlock } from '@/components/EditBlockModal';
 
 export default function CalendarPage() {
-  const { calendarEvents, addCalendarEvent, removeCalendarEvent } = useAppStore();
+  const { 
+    calendarEvents, 
+    addCalendarEvent, 
+    removeCalendarEvent, 
+    updateCalendarEvent 
+  } = useAppStore();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isPostulationModalOpen, setIsPostulationModalOpen] = useState(false);
+  const [editingBlock, setEditingBlock] = useState<EditableBlock | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [filterType, setFilterType] = useState<string>('todos');
   const [filterDay, setFilterDay] = useState<string>('todos');
   const [searchTerm, setSearchTerm] = useState('');
@@ -47,6 +56,35 @@ export default function CalendarPage() {
       if (dayA !== dayB) return dayA - dayB;
       return a.start_time.localeCompare(b.start_time);
     });
+
+  const handleEditEvent = (ev: any) => {
+    setEditingBlock({
+      id: ev.id,
+      type: ev.event_type || 'clase',
+      day: ev.day_of_week || 1,
+      timeStart: ev.start_time,
+      timeEnd: ev.end_time,
+      title: ev.title,
+      sub: ev.description || ev.location || '',
+      raw: ev,
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const handleSaveBlock = (id: string, type: string, updates: any) => {
+    updateCalendarEvent(id, {
+      title: updates.title,
+      description: updates.sub,
+      day_of_week: updates.day,
+      start_time: updates.start_time,
+      end_time: updates.end_time,
+      event_type: updates.event_type || 'clase',
+    });
+  };
+
+  const handleDeleteBlock = (id: string) => {
+    removeCalendarEvent(id);
+  };
 
   const getBadgeInfo = (type: string) => {
     switch (type) {
@@ -260,17 +298,26 @@ export default function CalendarPage() {
 
                         {/* Acciones */}
                         <td className="py-3.5 px-4 text-center">
-                          <button
-                            onClick={() => {
-                              if (confirm(`¿Eliminar "${ev.title}" del calendario?`)) {
-                                removeCalendarEvent(ev.id);
-                              }
-                            }}
-                            className="p-1.5 rounded-lg text-red-400 hover:bg-red-500/20 hover:text-red-300 transition"
-                            title="Eliminar este compromiso"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                          <div className="flex items-center justify-center gap-1">
+                            <button
+                              onClick={() => handleEditEvent(ev)}
+                              className="p-1.5 rounded-lg text-[#ffd166] hover:bg-[#ffd166]/20 transition"
+                              title="Editar horario y datos"
+                            >
+                              <Pencil className="w-4 h-4" />
+                            </button>
+                            <button
+                              onClick={() => {
+                                if (confirm(`¿Eliminar "${ev.title}" del calendario?`)) {
+                                  removeCalendarEvent(ev.id);
+                                }
+                              }}
+                              className="p-1.5 rounded-lg text-red-400 hover:bg-red-500/20 hover:text-red-300 transition"
+                              title="Eliminar este compromiso"
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </button>
+                          </div>
                         </td>
                       </tr>
                     );
@@ -314,13 +361,22 @@ export default function CalendarPage() {
                     <span className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${badge.bg}`}>
                       {badge.label}
                     </span>
-                    <button
-                      onClick={() => removeCalendarEvent(ev.id)}
-                      className="p-1 text-[#9aa4d6] hover:text-red-400 opacity-60 group-hover:opacity-100 transition"
-                      title="Eliminar evento"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => handleEditEvent(ev)}
+                        className="p-1 text-[#ffd166] hover:bg-[#ffd166]/20 rounded-md transition"
+                        title="Editar evento"
+                      >
+                        <Pencil className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => removeCalendarEvent(ev.id)}
+                        className="p-1 text-[#9aa4d6] hover:text-red-400 opacity-60 group-hover:opacity-100 transition"
+                        title="Eliminar evento"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
                   </div>
 
                   <h3 className="font-fredoka font-bold text-base text-[#eef1ff] [data-tema=dia]_&:text-[#1b2150] mt-2">
@@ -367,6 +423,15 @@ export default function CalendarPage() {
       <PostulationModal
         isOpen={isPostulationModalOpen}
         onClose={() => setIsPostulationModalOpen(false)}
+      />
+
+      {/* Modal para editar horas y minutos de eventos */}
+      <EditBlockModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        block={editingBlock}
+        onSave={handleSaveBlock}
+        onDelete={(id) => handleDeleteBlock(id)}
       />
     </div>
   );

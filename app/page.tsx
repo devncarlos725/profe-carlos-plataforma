@@ -11,24 +11,35 @@ import {
   Trash2, 
   Calendar as CalendarIcon,
   CheckCircle2,
-  Car
+  Car,
+  GripVertical,
+  Pencil
 } from 'lucide-react';
 import { useAppStore } from '@/lib/store';
 import { DAYS_NAMES } from '@/lib/initialData';
 import AddEventModal from '@/components/AddEventModal';
 import PostulationModal from '@/components/PostulationModal';
+import EditBlockModal, { EditableBlock } from '@/components/EditBlockModal';
 
 export default function HomePage() {
   const { 
     currentUser, 
     classes, 
+    addClassItem,
+    removeClassItem,
+    updateClassItem,
     calendarEvents, 
     addCalendarEvent, 
-    removeCalendarEvent 
+    removeCalendarEvent,
+    updateCalendarEvent,
+    moveItemToDay
   } = useAppStore();
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isPostulationModalOpen, setIsPostulationModalOpen] = useState(false);
+  const [editingBlock, setEditingBlock] = useState<EditableBlock | null>(null);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [dragOverDay, setDragOverDay] = useState<number | null>(null);
 
   const isTeacher = currentUser?.role === 'teacher';
 
@@ -60,6 +71,100 @@ export default function HomePage() {
   const distinctSchoolsCount = new Set(classes.map(c => c.school)).size;
   const takenClassesCount = classes.filter(c => c.status === 'firm').length;
   const planClassesCount = classes.filter(c => c.status === 'plan').length;
+
+  // Handlers para Drag & Drop (Trello style)
+  const handleDragStart = (e: React.DragEvent, block: any, dayNum: number) => {
+    if (!isTeacher) return;
+    e.dataTransfer.setData('application/json', JSON.stringify({ id: block.id, type: block.type, day: dayNum }));
+    e.dataTransfer.effectAllowed = 'move';
+  };
+
+  const handleDragOver = (e: React.DragEvent, dayNum: number) => {
+    if (!isTeacher) return;
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    if (dragOverDay !== dayNum) {
+      setDragOverDay(dayNum);
+    }
+  };
+
+  const handleDragLeave = (e: React.DragEvent, dayNum: number) => {
+    if (dragOverDay === dayNum) {
+      setDragOverDay(null);
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent, targetDay: number) => {
+    if (!isTeacher) return;
+    e.preventDefault();
+    setDragOverDay(null);
+    const rawData = e.dataTransfer.getData('application/json');
+    if (!rawData) return;
+    try {
+      const parsed = JSON.parse(rawData);
+      if (parsed.day !== targetDay) {
+        moveItemToDay(parsed.id, parsed.type, targetDay);
+      }
+    } catch (err) {
+      console.error('Error al mover bloque:', err);
+    }
+  };
+
+  // Handlers para Edición al hacer clic
+  const handleBlockClick = (block: any, dayNum: number) => {
+    if (!isTeacher) return;
+    setEditingBlock({
+      id: block.id,
+      type: block.type,
+      day: dayNum,
+      timeStart: block.timeStart,
+      timeEnd: block.timeEnd,
+      title: block.title,
+      sub: block.sub,
+      raw: block.raw,
+    });
+    setIsEditModalOpen(true);
+  };
+
+  const handleSaveBlock = (
+    id: string, 
+    type: string, 
+    updates: {
+      title: string;
+      sub?: string;
+      day: number;
+      start_time: string;
+      end_time: string;
+      event_type?: string;
+    }
+  ) => {
+    if (type === 'class') {
+      updateClassItem(id, {
+        school: updates.title,
+        subject: updates.sub || 'Educación Tecnológica',
+        day: updates.day,
+        start_time: updates.start_time,
+        end_time: updates.end_time,
+      });
+    } else {
+      updateCalendarEvent(id, {
+        title: updates.title,
+        description: updates.sub,
+        day_of_week: updates.day,
+        start_time: updates.start_time,
+        end_time: updates.end_time,
+        event_type: (updates.event_type as any) || 'clase',
+      });
+    }
+  };
+
+  const handleDeleteBlock = (id: string, type: string) => {
+    if (type === 'class') {
+      removeClassItem(id);
+    } else {
+      removeCalendarEvent(id);
+    }
+  };
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -186,11 +291,27 @@ export default function HomePage() {
         </span>
       </div>
 
-      {/* Grilla Semanal Columnar Interactiva */}
+      {/* Banner de Ayuda Drag & Drop tipo Trello */}
+      {isTeacher && (
+        <div className="p-3 px-4 rounded-2xl bg-[#ffd166]/15 border border-[#ffd166]/40 text-[#ffd166] [data-tema=dia]_&:text-[#9a6400] text-xs flex items-center justify-between gap-2 shadow-sm">
+          <div className="flex items-center gap-2">
+            <span className="text-base">📌</span>
+            <span>
+              <strong>Tablero tipo Trello interactivo:</strong> Hacé <strong>clic en cualquier bloque</strong> para editar sus horas, minutos o título. <strong>Arrastrá</strong> cualquier bloque hacia otro día para moverlo directamente.
+            </span>
+          </div>
+          <span className="hidden sm:inline-block text-[11px] opacity-80 bg-[#ffd166]/20 px-2.5 py-1 rounded-full font-bold">
+            Arrastrar & Soltar Activo ✨
+          </span>
+        </div>
+      )}
+
+      {/* Grilla Semanal Columnar Interactiva (Drag & Drop Trello Style) */}
       <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
         {[1, 2, 3, 4, 5].map((dayNum) => {
           const isToday = todayIndex === dayNum;
           const dayName = DAYS_NAMES[dayNum];
+          const isTargeted = dragOverDay === dayNum;
 
           // Clases del día
           const dayClasses = classes.filter(c => c.day === dayNum);
@@ -225,8 +346,13 @@ export default function HomePage() {
           return (
             <div
               key={dayNum}
-              className={`flex flex-col rounded-2xl border transition-all ${
-                isToday 
+              onDragOver={(e) => handleDragOver(e, dayNum)}
+              onDragLeave={(e) => handleDragLeave(e, dayNum)}
+              onDrop={(e) => handleDrop(e, dayNum)}
+              className={`flex flex-col rounded-2xl border transition-all duration-200 min-h-[300px] ${
+                isTargeted
+                  ? 'border-2 border-dashed border-[#ffd166] bg-[#ffd166]/20 ring-4 ring-[#ffd166]/30 scale-[1.02] shadow-2xl'
+                  : isToday 
                   ? 'border-[#ffd166] bg-[#151c3d]/90 [data-tema=dia]_&:bg-amber-50/50 shadow-lg' 
                   : 'border-[#2a3568] bg-[#151c3d]/40 [data-tema=dia]_&:bg-white [data-tema=dia]_&:border-[#d3d9ef]'
               }`}
@@ -276,31 +402,42 @@ export default function HomePage() {
                   return (
                     <div
                       key={block.id}
-                      className={`p-2.5 rounded-xl ${badgeBg} ${borderLeft} shadow-sm text-xs relative group transition-all hover:scale-[1.01]`}
+                      draggable={isTeacher}
+                      onDragStart={(e) => handleDragStart(e, block, dayNum)}
+                      onClick={() => handleBlockClick(block, dayNum)}
+                      className={`p-2.5 rounded-xl ${badgeBg} ${borderLeft} shadow-sm text-xs relative group transition-all duration-150 cursor-pointer hover:scale-[1.02] hover:shadow-lg active:cursor-grabbing select-none`}
+                      title="Hacé clic para editar horas y minutos · Arrastrá para mover a otro día"
                     >
                       <div className="flex items-start justify-between gap-1">
-                        <span className="font-bold leading-tight line-clamp-2">
-                          {block.title}
-                        </span>
-                        {/* Botón borrar si es evento personalizado */}
-                        {isTeacher && block.type !== 'class' && block.id.startsWith('ev-') && (
-                          <button
-                            onClick={() => removeCalendarEvent(block.id)}
-                            className="opacity-0 group-hover:opacity-100 p-0.5 hover:text-red-600 transition"
-                            title="Eliminar evento"
-                          >
-                            <Trash2 className="w-3 h-3" />
-                          </button>
+                        <div className="flex items-center gap-1.5 flex-1 pr-1">
+                          {isTeacher && (
+                            <GripVertical className="w-3 h-3 opacity-40 group-hover:opacity-100 shrink-0 cursor-grab active:cursor-grabbing" />
+                          )}
+                          <span className="font-bold leading-tight line-clamp-2">
+                            {block.title}
+                          </span>
+                        </div>
+
+                        {/* Botón editar visible en hover */}
+                        {isTeacher && (
+                          <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <span 
+                              className="p-1 rounded-md bg-black/20 hover:bg-black/40 text-inherit transition"
+                              title="Editar este horario"
+                            >
+                              <Pencil className="w-3 h-3" />
+                            </span>
+                          </div>
                         )}
                       </div>
 
-                      <div className="flex items-center gap-1 mt-1 font-semibold opacity-90">
+                      <div className="flex items-center gap-1 mt-1 font-semibold opacity-90 pl-4.5">
                         <Clock className="w-3 h-3" />
                         <span>{block.timeStart} – {block.timeEnd}</span>
                       </div>
 
                       {block.sub && (
-                        <p className="mt-1 opacity-80 text-[11px] leading-tight">
+                        <p className="mt-1 opacity-80 text-[11px] leading-tight pl-4.5">
                           {block.sub}
                         </p>
                       )}
@@ -375,6 +512,15 @@ export default function HomePage() {
       <PostulationModal
         isOpen={isPostulationModalOpen}
         onClose={() => setIsPostulationModalOpen(false)}
+      />
+
+      {/* Modal para editar horas, minutos y datos al hacer clic en cualquier bloque */}
+      <EditBlockModal
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        block={editingBlock}
+        onSave={handleSaveBlock}
+        onDelete={handleDeleteBlock}
       />
     </div>
   );

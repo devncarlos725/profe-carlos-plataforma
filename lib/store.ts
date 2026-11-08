@@ -338,6 +338,20 @@ export function useAppStore() {
     }
   };
 
+  const updateCalendarEvent = async (id: string, updates: Partial<CalendarEventItem>) => {
+    const updated = calendarEvents.map(e => (e.id === id ? { ...e, ...updates } : e));
+    setCalendarEvents(updated);
+    safeSetItem(STORAGE_KEYS.CALENDAR, JSON.stringify(updated));
+
+    if (isSupabaseConfigured && supabase) {
+      try {
+        await supabase.from('calendar_events').update(updates).eq('id', id);
+      } catch (err) {
+        console.error('Error actualizando evento en Supabase:', err);
+      }
+    }
+  };
+
   const toggleMaterialProgress = (materialId: string) => {
     const nextVal = !progress[materialId];
     const updated = { ...progress, [materialId]: nextVal };
@@ -749,6 +763,20 @@ export function useAppStore() {
     safeSetItem(STORAGE_KEYS.CLASSES, JSON.stringify(updated));
   };
 
+  const updateClassItem = (id: string, updates: Partial<ClassScheduleItem>) => {
+    const updated = classes.map(c => (c.id === id ? { ...c, ...updates } : c));
+    setClasses(updated);
+    safeSetItem(STORAGE_KEYS.CLASSES, JSON.stringify(updated));
+  };
+
+  const moveItemToDay = (itemId: string, itemType: string, targetDay: number) => {
+    if (itemType === 'class') {
+      updateClassItem(itemId, { day: targetDay });
+    } else {
+      updateCalendarEvent(itemId, { day_of_week: targetDay });
+    }
+  };
+
   const resetClassesToOfficial = () => {
     setClasses(INITIAL_CLASSES);
     safeSetItem(STORAGE_KEYS.CLASSES, JSON.stringify(INITIAL_CLASSES));
@@ -766,9 +794,12 @@ export function useAppStore() {
     calendarEvents,
     addCalendarEvent,
     removeCalendarEvent,
+    updateCalendarEvent,
     classes,
     addClassItem,
     removeClassItem,
+    updateClassItem,
+    moveItemToDay,
     resetClassesToOfficial,
     postulations,
     addPostulation,
