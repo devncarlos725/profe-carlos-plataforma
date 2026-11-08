@@ -220,15 +220,13 @@ export const INITIAL_CALENDAR_EVENTS: CalendarEventItem[] = [
   { id: 'ev-17', day_of_week: 3, start_time: '17:20', end_time: '17:55', title: '🚗 Mancopa → Casa', event_type: 'viaje' },
   { id: 'ev-18', day_of_week: 3, start_time: '18:00', end_time: '23:00', title: '🛋️ Libre', event_type: 'libre' },
 
-  // Jueves (Conrero 10:30-11:10 → Mancopa 13:00-14:20 → Ordoñez 15:00-18:30)
+  // Jueves (¡SIN Ordoñez! Mons. Conrero 10:30-11:10 → Mancopa 13:00-14:20 → Casa)
   { id: 'ev-19', day_of_week: 4, start_time: '08:00', end_time: '10:00', title: '🛋️ Libre / Casa', event_type: 'libre' },
   { id: 'ev-20', day_of_week: 4, start_time: '10:00', end_time: '10:17', title: '🚗 Casa → Mons. Conrero', event_type: 'viaje' },
   { id: 'ev-21', day_of_week: 4, start_time: '11:10', end_time: '12:20', title: '🛋️ Almuerzo / Pausa', event_type: 'libre' },
   { id: 'ev-22', day_of_week: 4, start_time: '12:20', end_time: '12:51', title: '🚗 Mons. Conrero → Mancopa', event_type: 'viaje' },
-  { id: 'ev-23', day_of_week: 4, start_time: '14:20', end_time: '14:55', title: '🚗 Mancopa → Ordoñez', event_type: 'viaje' },
-  { id: 'ev-24', day_of_week: 4, start_time: '15:00', end_time: '18:30', title: '💼 Ordoñez Vidrios', event_type: 'ordonez' },
-  { id: 'ev-25', day_of_week: 4, start_time: '18:30', end_time: '18:34', title: '🚗 Ordoñez → Casa', event_type: 'viaje' },
-  { id: 'ev-26', day_of_week: 4, start_time: '18:35', end_time: '23:00', title: '🛋️ Libre', event_type: 'libre' },
+  { id: 'ev-23', day_of_week: 4, start_time: '14:20', end_time: '14:55', title: '🚗 Mancopa → Casa', event_type: 'viaje' },
+  { id: 'ev-24', day_of_week: 4, start_time: '15:00', end_time: '23:00', title: '🛋️ Libre / Tarde libre en Casa', event_type: 'libre' },
 
   // Viernes (Timbó Nuevo 07:20-09:30 → Mons. Conrero 10:30-11:50 → Ordoñez 12:30-17:30)
   { id: 'ev-27', day_of_week: 5, start_time: '06:30', end_time: '06:55', title: '🚗 Casa → Timbó Nuevo', event_type: 'viaje' },

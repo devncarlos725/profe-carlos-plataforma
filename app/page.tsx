@@ -162,7 +162,7 @@ export default function HomePage() {
             {ordHours}h {ordMins > 0 ? `${ordMins}m` : ''}
           </span>
           <span className="text-xs text-[#9aa4d6] [data-tema=dia]_&:text-[#5a638f] font-semibold">
-            Ordoñez (Mar, Mié, Jue, Vie · Lun 0h)
+            Ordoñez (Mar, Mié, Vie · Lun y Jue 0h)
           </span>
         </div>
       </div>
