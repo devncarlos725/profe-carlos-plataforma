@@ -228,13 +228,13 @@ export const INITIAL_CALENDAR_EVENTS: CalendarEventItem[] = [
   { id: 'ev-23', day_of_week: 4, start_time: '14:20', end_time: '14:55', title: '🚗 Mancopa → Casa', event_type: 'viaje' },
   { id: 'ev-24', day_of_week: 4, start_time: '15:00', end_time: '23:00', title: '🛋️ Libre / Tarde libre en Casa', event_type: 'libre' },
 
-  // Viernes (Timbó Nuevo 07:20-09:30 → Mons. Conrero 10:30-11:50 → Ordoñez 12:30-17:30)
+  // Viernes (Timbó Nuevo 07:20-09:30 → Mons. Conrero 10:30-11:50 → Ordoñez 12:30-18:00 → Casa)
   { id: 'ev-27', day_of_week: 5, start_time: '06:30', end_time: '06:55', title: '🚗 Casa → Timbó Nuevo', event_type: 'viaje' },
   { id: 'ev-28', day_of_week: 5, start_time: '09:30', end_time: '09:57', title: '🚗 Timbó Nuevo → Mons. Conrero', event_type: 'viaje' },
-  { id: 'ev-29', day_of_week: 5, start_time: '12:00', end_time: '12:17', title: '🚗 Mons. Conrero → Ordoñez', event_type: 'viaje' },
-  { id: 'ev-30', day_of_week: 5, start_time: '12:30', end_time: '17:30', title: '💼 Ordoñez Vidrios', event_type: 'ordonez' },
-  { id: 'ev-31', day_of_week: 5, start_time: '17:30', end_time: '17:34', title: '🚗 Ordoñez → Casa', event_type: 'viaje' },
-  { id: 'ev-32', day_of_week: 5, start_time: '17:40', end_time: '23:00', title: '🛋️ Libre', event_type: 'libre' },
+  { id: 'ev-29', day_of_week: 5, start_time: '11:50', end_time: '12:25', title: '🚗 Mons. Conrero → Ordoñez', event_type: 'viaje' },
+  { id: 'ev-30', day_of_week: 5, start_time: '12:30', end_time: '18:00', title: '💼 Ordoñez Vidrios', event_type: 'ordonez' },
+  { id: 'ev-31', day_of_week: 5, start_time: '18:00', end_time: '18:05', title: '🚗 Ordoñez → Casa', event_type: 'viaje' },
+  { id: 'ev-32', day_of_week: 5, start_time: '18:10', end_time: '23:00', title: '🛋️ Libre / Fin de semana', event_type: 'libre' },
 ];
 
 // MATERIALES EDUCATIVOS INICIALES (PDFs de lectura, guías, videos de YouTube y tareas)
